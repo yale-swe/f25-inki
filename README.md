@@ -1,5 +1,28 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Tech Stack
+
+### Frontend
+- **TypeScript** with **Next.js** (React framework) and **TailwindCSS**
+  - Next.js for server-side rendering, SEO-friendly so that the documents can be sharable amongst friends and peers
+  - React to manage document viewing and annotation components
+  - TailwindCSS is fast and easy to use for UI
+
+### Document Processing
+- **PDF.js** for client-side PDF rendering
+
+### Backend & Database
+- **Supabase** (PostgreSQL with real-time capabilities)
+  - PostgreSQL database stores users, friend connections, documents, and annotations
+  - Database triggers and WebSocket connections for real-time sync
+  - Integrated file storage for PDF uploads and management
+  - Real-time channels for live collaborative annotation viewing
+
+### Authentication
+- **Supabase Auth** with Google OAuth integration
+  - Secure authentication for document access, sharing, and friend connections
+
+
 ## Getting Started
 
 First, run the development server:
