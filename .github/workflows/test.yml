@@ -59,18 +59,24 @@ jobs:
       - run: supabase db push || echo "Skipping local migration if not needed"
 
       - name: Run Unit Tests with Coverage
-        run: npm run test:unit -- --coverage --coverageReporters=text --coverageReporters=lcov
+        run: npm run test:coverage
         env:
           NODE_ENV: test
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
 
       - name: Run Integration Tests (API, Supabase)
-        run: npm run test:integration
+        run: npm test
         env:
           NODE_ENV: test
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: Run End-to-End Tests (Playwright)
+        run: npm run test:e2e
+        env:
+          NODE_ENV: test
+          BASE_URL: ${{ secrets.PROD_URL }}
 
       - name: Extract Coverage Percentage
         id: extract_coverage
