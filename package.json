@@ -7,7 +7,8 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "test": "echo \"No tests yet\""
+    "test": "echo \"No tests yet\"",
+    "test:unit": "echo 'No unit tests yet'"
   },
   "dependencies": {
     "react": "19.1.0",
