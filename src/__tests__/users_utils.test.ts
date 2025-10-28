@@ -1,9 +1,11 @@
 /**
  * @fileoverview
+ * Unit tests for src/lib/utils/users_utils.ts
  * Test suite checks:
  *  - Supabase queries are called correctly
  *  - Data is returned as expected
  *  - Errors are handled cleanly
+ *  - Edge cases like missing fields and timestamp updates
  */
 
 import { getUserProfile, updateUserProfile } from "@/lib/utils/users_utils";
@@ -69,6 +71,7 @@ describe("users_utils", () => {
         username: "eva",
         bio_text: "hi there",
         full_name: "Eva Z",
+        avatar_url: "https://example.com/avatar.png",
       };
 
       mockSingle.mockResolvedValueOnce({
@@ -81,10 +84,10 @@ describe("users_utils", () => {
 
       // Assert
       expect(supabase.from).toHaveBeenCalledWith("profiles");
-      expect(mockSelect).toHaveBeenCalled();
+      expect(mockSelect).toHaveBeenCalledWith("*");
       expect(mockEq).toHaveBeenCalledWith("id", "user-123");
       expect(mockSingle).toHaveBeenCalled();
-      expect(result).not.toBeNull();
+    //   expect(result).not.toBeNull();
       expect(result).toEqual(mockProfile);
     });
 
@@ -101,6 +104,23 @@ describe("users_utils", () => {
         mockSingle.mockResolvedValueOnce({ data: null, error: null });
         const result = await getUserProfile("missing-user");
         expect(result).toBeNull();
+    });
+
+    it("handles partial user profiles with optional fields", async () => {
+      const partialProfile = {
+        id: "user-999",
+        username: "partial",
+        full_name: null,
+        avatar_url: null,
+        bio_text: "",
+      };
+      mockSingle.mockResolvedValueOnce({ data: partialProfile, error: null });
+
+      const result = await getUserProfile("user-999");
+
+      expect(result).toEqual(partialProfile);
+      expect(result?.full_name).toBeNull();
+      expect(result?.bio_text).toBe("");
     });
   });
 
@@ -127,7 +147,7 @@ describe("users_utils", () => {
       );
       expect(mockEq).toHaveBeenCalledWith("id", "user-123");
       expect(mockSelect).toHaveBeenCalled();
-      expect(result).not.toBeNull();
+    //   expect(result).not.toBeNull();
       expect(result?.bio_text).toBe("updated bio");
     });
 
@@ -140,5 +160,63 @@ describe("users_utils", () => {
       await expect(updateUserProfile("user-123", { bio_text: "oops" }))
         .rejects.toThrow("Permission denied");
     });
+
+    it("adds updated_at timestamp automatically", async () => {
+      const now = Date.now;
+      Date.now = jest.fn(() => 1730000000000); // fixed timestamp
+
+      const mockUpdated = {
+        id: "user-123",
+        bio_text: "new bio",
+        updated_at: new Date(1730000000000).toISOString(),
+      };
+      mockSingle.mockResolvedValueOnce({ data: mockUpdated, error: null });
+
+      const result = await updateUserProfile("user-123", { bio_text: "new bio" });
+
+      expect(mockUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bio_text: "new bio",
+          updated_at: expect.any(String),
+        })
+      );
+      expect(result?.updated_at).toBe(mockUpdated.updated_at);
+
+      Date.now = now; // restore
+    });
+
+    it("updates multiple fields correctly", async () => {
+      const mockUpdated = {
+        id: "user-888",
+        username: "updated_user",
+        full_name: "Updated Name",
+        bio_text: "Refreshed bio",
+        updated_at: new Date().toISOString(),
+      };
+      mockSingle.mockResolvedValueOnce({ data: mockUpdated, error: null });
+
+      const result = await updateUserProfile("user-888", {
+        username: "updated_user",
+        full_name: "Updated Name",
+        bio_text: "Refreshed bio",
+      });
+
+      expect(mockUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          username: "updated_user",
+          full_name: "Updated Name",
+          bio_text: "Refreshed bio",
+        })
+      );
+      expect(result?.username).toBe("updated_user");
+    });
+
+    it("returns null when no updated data but no error", async () => {
+      mockSingle.mockResolvedValueOnce({ data: null, error: null });
+
+      const result = await updateUserProfile("user-123", { bio_text: "ok" });
+      expect(result).toBeNull();
+    });
+
   });
 });

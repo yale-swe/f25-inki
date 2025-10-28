@@ -1,15 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
-
-// Define a TS interface for type safety
-export interface UserProfile {
-  id: string; // UUID matches auth.users.id
-  username: string;
-  full_name?: string;
-  avatar_url?: string;
-  bio_text?: string;
-  created_at?: string;
-  updated_at?: string;
-}
+import { UserProfile } from "@/lib/types/profile_doc_types";
 
 
 // Fetch user's profile data from 'profiles' table
