@@ -79,6 +79,8 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
+          NEXT_DISABLE_LIGHTNINGCSS: 1
+          NEXT_TELEMETRY_DISABLED: 1
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
@@ -86,6 +88,8 @@ jobs:
         run: npm run test:e2e
         env:
           NODE_ENV: test
+          NEXT_DISABLE_LIGHTNINGCSS: 1
+          NEXT_TELEMETRY_DISABLED: 1
           BASE_URL: http://localhost:3000
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
@@ -162,6 +166,8 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
+          NEXT_DISABLE_LIGHTNINGCSS: 1
+          NEXT_TELEMETRY_DISABLED: 1
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
@@ -169,6 +175,8 @@ jobs:
         run: npm run test:e2e
         env:
           NODE_ENV: test
+          NEXT_DISABLE_LIGHTNINGCSS: 1
+          NEXT_TELEMETRY_DISABLED: 1
           BASE_URL: http://localhost:3000
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
