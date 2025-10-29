@@ -4,9 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "dev:ci": "next dev",
-    "build": "next build --turbopack",
-    "start": "next start",
+    "build": "next build",
+    "start": "next start -p 3000",
     "lint": "eslint",
     "test": "jest",
     "test:watch": "jest --watch",
