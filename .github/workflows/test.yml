@@ -40,13 +40,11 @@ jobs:
           node-version: 22
           cache: "npm"
 
-      - name: Ensure optional deps & scripts are enabled
-        run: |
-          npm config set optional true
-          npm config set ignore-scripts false
+      - name: Ensure install runs postinstall scripts
+        run: npm config set ignore-scripts false
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --include=optional
       
       - name: Verify lightningcss installed
         run: node -e "require('lightningcss'); console.log('lightningcss OK on', process.platform, process.arch)"
@@ -164,13 +162,11 @@ jobs:
         with:
           node-version: 22
 
-      - name: Ensure optional deps & scripts are enabled
-        run: |
-          npm config set optional true
-          npm config set ignore-scripts false
+      - name: Ensure install runs postinstall scripts
+        run: npm config set ignore-scripts false
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --include=optional
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
