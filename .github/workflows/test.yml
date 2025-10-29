@@ -46,9 +46,6 @@ jobs:
       - name: Install dependencies
         run: npm ci --include=optional
       
-      - name: Verify lightningcss installed
-        run: node -e "require('lightningcss'); console.log('lightningcss OK on', process.platform, process.arch)"
-
       - name: Copy example .env if present
         run: |
           if [ -f .env.example ]; then
