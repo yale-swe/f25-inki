@@ -32,7 +32,9 @@ export async function parsePdfFile(file: File): Promise<DocumentParseResult> {
       try {
         const page = await pdf.getPage(pageNum);
         const textContent = await page.getTextContent();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const itemsByLine: Map<number, any[]> = new Map();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         textContent.items.forEach((item: any) => {
           if (!item.str || !item.transform) return;
           const y = Math.round(item.transform[5]);
