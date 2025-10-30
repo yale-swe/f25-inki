@@ -12,6 +12,7 @@ if (typeof window !== 'undefined') {
     import.meta.url
   ).toString();
 }
+
 /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-require-imports */
 export async function parsePdfFile(file: File): Promise<DocumentParseResult> {
   try {
