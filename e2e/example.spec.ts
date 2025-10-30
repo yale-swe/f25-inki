@@ -11,7 +11,7 @@ test('homepage loads successfully', async ({ page }) => {
 test('login page loads successfully', async ({ page }) => {
   await page.goto(`${BASE_URL}/login`);
   await expect(page).toHaveURL(`${BASE_URL}/login`);
-  await expect(page.locator('h1')).toContainText(/login/i);
+  await expect(page.locator('h1')).toContainText(/welcome back/i);
 });
 
 test('signup page loads successfully', async ({ page }) => {
