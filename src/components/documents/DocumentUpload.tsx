@@ -38,6 +38,7 @@ export default function DocumentUpload({ onUploadSuccess, onUploadError }: Docum
     if (files.length > 0) {
       handleFileUpload(files[0]);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,6 +46,7 @@ export default function DocumentUpload({ onUploadSuccess, onUploadError }: Docum
     if (files && files.length > 0) {
       handleFileUpload(files[0]);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFileUpload = async (file: File) => {

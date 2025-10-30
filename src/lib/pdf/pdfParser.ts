@@ -3,6 +3,7 @@
 
 import { DocumentParseResult } from '@/lib/types/document';
 
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-require-imports */
 let pdfjs: any = null;
 if (typeof window !== 'undefined') {
   pdfjs = require('pdfjs-dist');
@@ -11,6 +12,7 @@ if (typeof window !== 'undefined') {
     import.meta.url
   ).toString();
 }
+/* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-require-imports */
 export async function parsePdfFile(file: File): Promise<DocumentParseResult> {
   try {
     if (typeof window === 'undefined' || !pdfjs) {
@@ -37,7 +39,8 @@ export async function parsePdfFile(file: File): Promise<DocumentParseResult> {
           if (!itemsByLine.has(y)) {
             itemsByLine.set(y, []);
           }
-          itemsByLine.get(y)!.push(item);});
+          itemsByLine.get(y)!.push(item);
+        });
 
         const sortedLines = Array.from(itemsByLine.entries())
           .sort((a, b) => b[0] - a[0]);

@@ -20,6 +20,7 @@ export default function SharedDocumentPage({ params }: SharedDocumentPageProps) 
   const [searchTerm, setSearchTerm] = useState('');
   useEffect(() => {
     loadDocument();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [publicId]);
   const loadDocument = async () => {
     try {
@@ -143,7 +144,7 @@ export default function SharedDocumentPage({ params }: SharedDocumentPageProps) 
                   </svg>
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No content available</h3>
-                <p className="text-gray-500">This document doesn't have any text content to display.</p>
+                <p className="text-gray-500">This document doesn&apos;t have any text content to display.</p>
               </div>
             )}
           </div>

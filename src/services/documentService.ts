@@ -1,4 +1,4 @@
-// Service layer for all document CRUD operations with Supabase database and RLS policies
+// Service layer for all document CRUD operations with Supabase database and policies
 
 import { supabase } from '@/lib/supabaseClient';
 import { Document, DocumentCreateInput } from '@/lib/types/document';
@@ -25,7 +25,7 @@ export class DocumentService {
 
       if (error) {
         console.error('Database error:', error);
-        throw new Error(`Database error: ${error.message}`);
+        throw new Error(`Database error: ${error.message || 'Unable to fetch documents'}`);
       }
 
       return data || [];

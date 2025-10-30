@@ -40,7 +40,7 @@ export default function DocumentsPage() {
     }
   };
 
-  const handleUploadSuccess = (documentId: string) => {
+  const handleUploadSuccess = () => {
     setShowUpload(false);
     loadDocuments(); // Refresh the list
   };
