@@ -95,7 +95,7 @@ export default function DocumentViewer({ documentId }: DocumentViewerProps) {
   const scrollToResult = (index: number) => {
     const startIndex = searchResults[index];
 
-    const textElement = document.querySelector('.document-text');
+    const textElement = window.document.querySelector('.document-text');
     if (textElement) {
       const textContent = textElement.textContent || '';
       const beforeText = textContent.substring(0, startIndex);
