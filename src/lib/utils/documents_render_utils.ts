@@ -104,7 +104,7 @@ export async function getSharedDocuments(
   }
 
   // Normalize nested arrays (Supabase sometimes returns arrays for relationships)
-  const normalized = data.map((row: any) => ({
+  const normalized = data.map((row): SharedDocumentRow => ({
     document_id: row.document_id,
     permission_level: row.permission_level,
     documents: Array.isArray(row.documents) ? row.documents[0] : row.documents,
@@ -113,11 +113,11 @@ export async function getSharedDocuments(
 
   // Flatten if requested
   if (flatten) {
-    return normalized.map((row: any) => ({
+    return normalized.map((row): FlattenedSharedDocument => ({
       ...row.documents,
       permission_level: row.permission_level,
       shared_by: row.shared_by,
-    })) as FlattenedSharedDocument[];
+    }));
   }
 
   return normalized as SharedDocumentRow[];

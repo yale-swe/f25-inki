@@ -10,15 +10,15 @@ export interface FriendRow {
   updated_at: string;
 }
 
-// User profile info
+// Minimal user profile info returned in joins
 interface UserProfile {
   id: string;
   username: string;
-  full_name?: string;
-  avatar_url?: string;
+  full_name?: string | null;
+  avatar_url?: string | null;
 }
 
-// Friendship record with friend's profile info
+// Combined record representing one friendship with the related user's profile
 export interface FriendRecord {
   id: string;
   status: "pending" | "accepted" | "rejected" | "blocked";
@@ -27,11 +27,17 @@ export interface FriendRecord {
   friend: UserProfile;
 }
 
+// Internal helper describing a row returned from Supabase joins
+interface FriendshipJoinedRow extends FriendRow {
+  requester?: UserProfile;
+  addressee?: UserProfile;
+}
+
 
 // Fetch all accepted friendships for a user.
 // Includes both directions (where user is requester or addressee)
 export async function getFriends(userId: string): Promise<FriendRecord[]> {
-  const { data, error } = await supabase
+  const response = await supabase
     .from("friendships")
     .select(`
       id,
@@ -46,28 +52,28 @@ export async function getFriends(userId: string): Promise<FriendRecord[]> {
     .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`)
     .eq("status", "accepted");
 
-  if (error) {
-    console.error("Error fetching friends:", error.message);
-    throw new Error(error.message);
-  }
+  const { data, error } = response as {
+    data: FriendshipJoinedRow[] | null;
+    error: { message: string } | null;
+  };
 
-  if (!data || data.length === 0) {
-    return [];
-  }
+  if (error) throw new Error(error.message);
+  if (!data || data.length === 0) return [];
 
-  // Map to FriendRecord, determining which profile is the "friend"
-  return data.map((row: any) => ({
-    id: row.id,
-    status: row.status,
-    created_at: row.created_at,
-    updated_at: row.updated_at,
-    friend: row.requester_id === userId ? row.addressee : row.requester,
-  }));
+  return data.map(
+    (row): FriendRecord => ({
+      id: row.id,
+      status: row.status,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      friend: row.requester_id === userId ? row.addressee! : row.requester!,
+    })
+  );
 }
 
 // Get pending friend requests (where current user is addressee)
 export async function getPendingRequests(userId: string): Promise<FriendRecord[]> {
-  const { data, error } = await supabase
+  const response = await supabase
     .from("friendships")
     .select(`
       id,
@@ -81,27 +87,29 @@ export async function getPendingRequests(userId: string): Promise<FriendRecord[]
     .eq("addressee_id", userId)
     .eq("status", "pending");
 
-  if (error) {
-    console.error("Error fetching pending requests:", error.message);
-    throw new Error(error.message);
-  }
+  const { data, error } = response as {
+    data: FriendshipJoinedRow[] | null;
+    error: { message: string } | null;
+  };
 
-  if (!data || data.length === 0) {
-    return [];
-  }
+  if (error) throw new Error(error.message);
+  if (!data || data.length === 0) return [];
 
-  return data.map((row: any) => ({
-    id: row.id,
-    status: row.status,
-    created_at: row.created_at,
-    updated_at: row.updated_at,
-    friend: row.requester,
-  }));
+  return data.map(
+    (row): FriendRecord => ({
+      id: row.id,
+      status: row.status,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      friend: row.requester!,
+    })
+  );
 }
+
 
 // Get sent friend requests (where current user is requester)
 export async function getSentRequests(userId: string): Promise<FriendRecord[]> {
-  const { data, error } = await supabase
+  const response = await supabase
     .from("friendships")
     .select(`
       id,
@@ -115,22 +123,23 @@ export async function getSentRequests(userId: string): Promise<FriendRecord[]> {
     .eq("requester_id", userId)
     .eq("status", "pending");
 
-  if (error) {
-    console.error("Error fetching sent requests:", error.message);
-    throw new Error(error.message);
-  }
+  const { data, error } = response as {
+    data: FriendshipJoinedRow[] | null;
+    error: { message: string } | null;
+  };
 
-  if (!data || data.length === 0) {
-    return [];
-  }
+  if (error) throw new Error(error.message);
+  if (!data || data.length === 0) return [];
 
-  return data.map((row: any) => ({
-    id: row.id,
-    status: row.status,
-    created_at: row.created_at,
-    updated_at: row.updated_at,
-    friend: row.addressee,
-  }));
+  return data.map(
+    (row): FriendRecord => ({
+      id: row.id,
+      status: row.status,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      friend: row.addressee!,
+    })
+  );
 }
 
 // Send a new friend request
@@ -142,109 +151,110 @@ export async function sendFriendRequest(
     throw new Error("Cannot send a friend request to yourself.");
   }
 
-  // Check if friendship already exists (in either direction)
-  const { data: existing } = await supabase
+  const existingResponse = await supabase
     .from("friendships")
     .select("id, status")
-    .or(`and(requester_id.eq.${requesterId},addressee_id.eq.${addresseeId}),and(requester_id.eq.${addresseeId},addressee_id.eq.${requesterId})`)
+    .or(
+      `and(requester_id.eq.${requesterId},addressee_id.eq.${addresseeId}),
+       and(requester_id.eq.${addresseeId},addressee_id.eq.${requesterId})`
+    )
     .maybeSingle();
 
-  if (existing) {
-    throw new Error(`Friendship already exists with status: ${existing.status}`);
-  }
+  const { data: existing, error: existingError } = existingResponse as {
+    data: Pick<FriendRow, "id" | "status"> | null;
+    error: { message: string } | null;
+  };
 
-  const { data, error } = await supabase
+  if (existingError) throw new Error(existingError.message);
+  if (existing) throw new Error(`Friendship already exists with status: ${existing.status}`);
+
+  const insertResponse = await supabase
     .from("friendships")
     .insert([
-      {
-        requester_id: requesterId,
-        addressee_id: addresseeId,
-        status: "pending",
-      },
+      { requester_id: requesterId, addressee_id: addresseeId, status: "pending" },
     ])
     .select()
     .single();
 
-  if (error) {
-    console.error("Error sending friend request:", error.message);
-    throw new Error(error.message);
-  }
+  const { data, error } = insertResponse as {
+    data: FriendRow;
+    error: { message: string } | null;
+  };
 
+  if (error) throw new Error(error.message);
   return data;
 }
 
+
 // Respond to a friend request (accept / reject / block)
-// Only the addressee can respond
+// Only the addressee can respond.
 export async function respondToFriendRequest(
   friendshipId: string,
   userId: string,
   newStatus: "accepted" | "rejected" | "blocked"
 ): Promise<FriendRow> {
-  // Verify user is the addressee
-  const { data: friendship, error: fetchError } = await supabase
+  const fetchResponse = await supabase
     .from("friendships")
     .select("addressee_id, status")
     .eq("id", friendshipId)
     .single();
 
-  if (fetchError) {
-    console.error("Error fetching friendship:", fetchError.message);
-    throw new Error(fetchError.message);
-  }
+  const { data: friendship, error: fetchError } = fetchResponse as {
+    data: Pick<FriendRow, "addressee_id" | "status">;
+    error: { message: string } | null;
+  };
 
+  if (fetchError) throw new Error(fetchError.message);
   if (friendship.addressee_id !== userId) {
     throw new Error("Only the addressee can respond to this request.");
   }
-
   if (friendship.status !== "pending") {
     throw new Error(`Cannot respond to a ${friendship.status} request.`);
   }
 
-  const { data, error } = await supabase
+  const updateResponse = await supabase
     .from("friendships")
     .update({ status: newStatus, updated_at: new Date().toISOString() })
     .eq("id", friendshipId)
     .select()
     .single();
 
-  if (error) {
-    console.error("Error updating friend request:", error.message);
-    throw new Error(error.message);
-  }
+  const { data, error } = updateResponse as {
+    data: FriendRow;
+    error: { message: string } | null;
+  };
 
+  if (error) throw new Error(error.message);
   return data;
 }
+
 
 // Remove a friendship (either user can remove)
 export async function removeFriend(
   friendshipId: string,
   userId: string
 ): Promise<boolean> {
-  // Verify user is part of this friendship
-  const { data: friendship, error: fetchError } = await supabase
+  const fetchResponse = await supabase
     .from("friendships")
     .select("requester_id, addressee_id")
     .eq("id", friendshipId)
     .single();
 
-  if (fetchError) {
-    console.error("Error fetching friendship:", fetchError.message);
-    throw new Error(fetchError.message);
-  }
+  const { data: friendship, error: fetchError } = fetchResponse as {
+    data: Pick<FriendRow, "requester_id" | "addressee_id">;
+    error: { message: string } | null;
+  };
+
+  if (fetchError) throw new Error(fetchError.message);
 
   if (friendship.requester_id !== userId && friendship.addressee_id !== userId) {
     throw new Error("You are not authorized to remove this friendship.");
   }
 
-  const { error } = await supabase
-    .from("friendships")
-    .delete()
-    .eq("id", friendshipId);
+  const deleteResponse = await supabase.from("friendships").delete().eq("id", friendshipId);
 
-  if (error) {
-    console.error("Error deleting friendship:", error.message);
-    throw new Error(error.message);
-  }
+  const { error } = deleteResponse as { error: { message: string } | null };
+  if (error) throw new Error(error.message);
 
   return true;
 }
