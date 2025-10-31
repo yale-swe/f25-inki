@@ -1,7 +1,40 @@
-// Utilities for fetching and managin user documents in Supabase
-
+// Utilities for fetching and managing user documents in Supabase
 import { supabase } from "@/lib/supabaseClient";
-import { DocumentRow, SharedDocumentRow, FlattenedSharedDocument } from "@/lib/types/profile_doc_types";
+
+// Represents a row from the `documents` table.
+export interface DocumentRow {
+  id: string;
+  owner_id: string;
+  title: string;
+  status: "processing" | "ready" | "error";
+  created_at: string;
+  updated_at: string;
+  file_size?: number;
+  page_count?: number;
+  storage_bucket?: string;
+  storage_path?: string;
+  bytes?: number;
+  raw_text_bytes?: number;
+}
+
+// Represents the user profile of the sharer (joined via shared_by)
+export interface SharedByProfile {
+  username: string;
+  full_name: string;
+}
+
+// Represents a single record from the `document_shares` table.
+export interface SharedDocumentRow {
+  document_id: string;
+  permission_level: "view" | "comment" | "edit";
+  documents: DocumentRow; // nested object from `documents`
+  shared_by: SharedByProfile; // nested object from `profiles`
+}
+
+export interface FlattenedSharedDocument extends DocumentRow {
+  permission_level: "view" | "comment" | "edit";
+  shared_by: SharedByProfile;
+}
 
 
 // Get all docs owned by a user 
