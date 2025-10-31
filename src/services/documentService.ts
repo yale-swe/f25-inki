@@ -176,7 +176,6 @@ export class DocumentService {
           storage_path: meta.storage_path,
           mime_type: meta.mime_type,
           bytes: meta.bytes,
-          public_id: meta.public_id,
           status: 'processing'
         })
         .select()
