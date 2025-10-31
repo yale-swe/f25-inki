@@ -5,7 +5,6 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { parseDocument } from '@/lib/pdf/pdfParser';
-import { generatePublicId } from '@/lib/utils/helpers';
 import { DocumentService } from '@/services/documentService';
 import { uploadUserPdf } from '@/lib/supabase/storage';
 import { supabase } from '@/lib/supabaseClient';
@@ -79,14 +78,12 @@ export default function DocumentUpload({ onUploadSuccess, onUploadError }: Docum
       }
 
       setUploadProgress(50);
-      const publicId = generatePublicId();
       const document = await DocumentService.createProcessingDocument({
         title: file.name.replace(/\.[^/.]+$/, ''),
         storage_bucket: storageInfo?.bucket || '',
         storage_path: storageInfo?.path || '',
         mime_type: file.type,
-        bytes: file.size,
-        public_id: publicId
+        bytes: file.size
       });
 
       documentId = document.id;

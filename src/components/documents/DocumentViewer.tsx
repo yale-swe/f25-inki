@@ -182,14 +182,6 @@ export default function DocumentViewer({ documentId }: DocumentViewerProps) {
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              {document.public_id && (
-                <button
-                  onClick={() => navigator.clipboard.writeText(`${window.location.origin}/shared/${document.public_id}`)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
-                >
-                  Share
-                </button>
-              )}
             </div>
           </div>
         </div>

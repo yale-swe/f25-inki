@@ -37,13 +37,3 @@ export function getStatusColor(status: string): string {
       return 'bg-gray-100 text-gray-800';
   }
 }
-
-// generates the public id for each document
-export function generatePublicId(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < 8; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-}

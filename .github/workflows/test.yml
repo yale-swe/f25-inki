@@ -25,9 +25,9 @@ jobs:
           POSTGRES_DB: test_db
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
+          --health-cmd "pg_isready -U postgres" 
+          --health-interval 10s 
+          --health-timeout 5s 
           --health-retries 5
 
     steps:
@@ -124,10 +124,10 @@ jobs:
           COVERAGE=${{ needs.test.outputs.coverage_percent }}
           echo "Reported coverage: ${COVERAGE}%"
           if [ "$COVERAGE" != "N/A" ] && (( $(echo "$COVERAGE < 80" | bc -l) )); then
-            echo " Coverage below threshold (80%)."
+            echo "Coverage below threshold (80%)."
             exit 1
           else
-            echo " Coverage meets minimum threshold."
+            echo "Coverage meets minimum threshold."
           fi
 
   e2e:

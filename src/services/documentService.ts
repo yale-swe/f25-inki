@@ -1,4 +1,4 @@
-// Service layer for all document CRUD operations with Supabase database and policies
+// Service layer for all document CRUD operations 
 
 import { supabase } from '@/lib/supabaseClient';
 import { Document, DocumentCreateInput } from '@/lib/types/document';
@@ -130,11 +130,9 @@ export class DocumentService {
   static async deleteDocument(id: string): Promise<void> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
       if (!user) {
         throw new Error('User not authenticated');
       }
-
       const { error } = await supabase
         .from('documents')
         .delete()
@@ -150,35 +148,12 @@ export class DocumentService {
     }
   }
 
-  static async getDocumentByPublicId(publicId: string): Promise<Document | null> {
-    try {
-      const { data, error } = await supabase
-        .from('documents')
-        .select('*')
-        .eq('public_id', publicId)
-        .single();
-
-      if (error) {
-        if (error.code === 'PGRST116') {
-          return null;
-        }
-        throw error;
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Error fetching document by public ID:', error);
-      throw error;
-    }
-  }
-
   static async createProcessingDocument(meta: {
     title: string;
     storage_bucket: string;
     storage_path: string;
     mime_type: string;
     bytes: number;
-    public_id?: string
   }): Promise<Document> {
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser();

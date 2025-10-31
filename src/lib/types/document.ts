@@ -37,5 +37,4 @@ export interface DocumentCreateInput {
   raw_text: string;
   storage_bucket?: string;
   storage_path?: string;
-  public_id?: string;
 }

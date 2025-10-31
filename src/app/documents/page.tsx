@@ -6,14 +6,13 @@ import Link from 'next/link';
 import { Document } from '@/lib/types/document';
 import { DocumentService } from '@/services/documentService';
 import DocumentUpload from '@/components/documents/DocumentUpload';
-import { formatFileSize, formatDateShort, getStatusColor } from '@/lib/utils/helpers';
+import { formatFileSize, formatDateShort } from '@/lib/utils/helpers';
 
 export default function DocumentsPage() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showUpload, setShowUpload] = useState(false);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
   useEffect(() => {
     loadDocuments();
   }, []);
@@ -129,9 +128,9 @@ export default function DocumentsPage() {
             </button>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="grid grid-cols-3 gap-6">
             {documents.map((doc) => (
-              <div key={doc.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 w-full">
+              <div key={doc.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-medium text-gray-900 truncate">
@@ -141,19 +140,14 @@ export default function DocumentsPage() {
                       {doc.mime_type} • {formatFileSize(doc.bytes)}
                     </p>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(doc.status)}`}>
-                      {doc.status}
-                    </span>
-                    <button
-                      onClick={() => handleDeleteDocument(doc.id)}
-                      className="text-gray-400 hover:text-red-500 transition-colors"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => handleDeleteDocument(doc.id)}
+                    className="text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
                 </div>
 
                 <div className="space-y-2 mb-4">
@@ -178,19 +172,6 @@ export default function DocumentsPage() {
                   >
                     View
                   </Link>
-                  {doc.public_id && (
-                    <button
-                      onClick={() => {
-                        const shareUrl = `${window.location.origin}/shared/${doc.public_id}`;
-                        navigator.clipboard.writeText(shareUrl);
-                        setCopiedId(doc.id);
-                        setTimeout(() => setCopiedId(null), 2000);
-                      }}
-                      className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
-                    >
-                      {copiedId === doc.id ? 'Copied!' : 'Share'}
-                    </button>
-                  )}
                 </div>
               </div>
             ))}
