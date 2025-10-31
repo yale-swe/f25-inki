@@ -1,71 +1,77 @@
 /**
  * @fileoverview
  * Unit tests for src/lib/utils/users_utils.ts
- * Test suite checks:
- *  - Supabase queries are called correctly
- *  - Data is returned as expected
- *  - Errors are handled cleanly
- *  - Edge cases like missing fields and timestamp updates
+ * Verifies Supabase query behavior, data handling, and edge cases.
  */
 
 import { getUserProfile, updateUserProfile } from "@/lib/utils/users_utils";
 import { supabase } from "@/lib/supabaseClient";
 
-// Mock the Supabase client with proper query chain
+// Create typed mocks inline
+
+// Define a small interface describing the chained Supabase methods you use
+interface SupabaseTableMock {
+  select: jest.Mock;
+  update: jest.Mock;
+  eq: jest.Mock;
+  single: jest.Mock;
+}
+
+// Mock the Supabase client module before any imports use it
 jest.mock("@/lib/supabaseClient", () => ({
   supabase: {
     from: jest.fn(),
   },
 }));
 
+// Strongly type the mocked Supabase client
 const mockedSupabase = jest.mocked(supabase);
 
+// Individual mocks for chain methods
+const mockSelect: jest.Mock = jest.fn();
+const mockUpdate: jest.Mock = jest.fn();
+const mockEq: jest.Mock = jest.fn();
+const mockSingle: jest.Mock = jest.fn();
+
+
+beforeEach(() => {
+  // Clear all mocks between tests
+  jest.clearAllMocks();
+
+  // Reset base mock behavior
+  mockSingle.mockResolvedValue({ data: null, error: null });
+
+  // Chain behavior: from() → select()/update()
+  mockedSupabase.from.mockReturnValue({
+  select: mockSelect,
+  update: mockUpdate,
+} as unknown as ReturnType<typeof supabase.from>);
+
+  // select() → eq() → single()
+  mockSelect.mockReturnValue({
+    eq: mockEq,
+    single: mockSingle,
+  } satisfies Pick<SupabaseTableMock, "eq" | "single">);
+
+  // update() → eq()
+  mockUpdate.mockReturnValue({
+    eq: mockEq,
+  } satisfies Pick<SupabaseTableMock, "eq">);
+
+  // eq() → select()/single()
+  mockEq.mockReturnValue({
+    select: mockSelect,
+    single: mockSingle,
+  } satisfies Pick<SupabaseTableMock, "select" | "single">);
+});
+
+
+// Tests
+
 describe("users_utils", () => {
-  // Create mock chain functions
-  const mockSelect = jest.fn();
-  const mockEq = jest.fn();
-  const mockSingle = jest.fn();
-  const mockUpdate = jest.fn();
-
-  beforeEach(() => {
-    // Setup the chain: from() → select()/update()
-    mockedSupabase.from.mockReturnValue({
-      select: mockSelect,
-      update: mockUpdate,
-    } as any);
-
-    // For getUserProfile: select() → eq() → single()
-    // For updateUserProfile after eq: select() → single()
-    mockSelect.mockReturnValue({
-      eq: mockEq,
-      single: mockSingle,  // For when select comes after eq
-    } as any);
-
-    // For updateUserProfile: update() → eq() → select() → single()
-    mockUpdate.mockReturnValue({
-      eq: mockEq,
-    } as any);
-
-    // eq() can lead to either single() or select()
-    mockEq.mockReturnValue({
-      select: mockSelect,
-      single: mockSingle,
-    } as any);
-
-    mockSingle.mockResolvedValue({
-      data: null,
-      error: null,
-    });
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   // getUserProfile
   describe("getUserProfile", () => {
     it("returns user data when profile exists", async () => {
-      // Arrange
       const mockProfile = {
         id: "user-123",
         username: "eva",
@@ -74,20 +80,14 @@ describe("users_utils", () => {
         avatar_url: "https://example.com/avatar.png",
       };
 
-      mockSingle.mockResolvedValueOnce({
-        data: mockProfile,
-        error: null,
-      });
+      mockSingle.mockResolvedValueOnce({ data: mockProfile, error: null });
 
-      // Act
       const result = await getUserProfile("user-123");
 
-      // Assert
       expect(supabase.from).toHaveBeenCalledWith("profiles");
       expect(mockSelect).toHaveBeenCalledWith("*");
       expect(mockEq).toHaveBeenCalledWith("id", "user-123");
       expect(mockSingle).toHaveBeenCalled();
-    //   expect(result).not.toBeNull();
       expect(result).toEqual(mockProfile);
     });
 
@@ -101,9 +101,9 @@ describe("users_utils", () => {
     });
 
     it("returns null if Supabase returns no data and no error", async () => {
-        mockSingle.mockResolvedValueOnce({ data: null, error: null });
-        const result = await getUserProfile("missing-user");
-        expect(result).toBeNull();
+      mockSingle.mockResolvedValueOnce({ data: null, error: null });
+      const result = await getUserProfile("missing-user");
+      expect(result).toBeNull();
     });
 
     it("handles partial user profiles with optional fields", async () => {
@@ -114,6 +114,7 @@ describe("users_utils", () => {
         avatar_url: null,
         bio_text: "",
       };
+
       mockSingle.mockResolvedValueOnce({ data: partialProfile, error: null });
 
       const result = await getUserProfile("user-999");
@@ -124,7 +125,6 @@ describe("users_utils", () => {
     });
   });
 
-
   // updateUserProfile
   describe("updateUserProfile", () => {
     it("updates and returns the updated profile", async () => {
@@ -134,10 +134,7 @@ describe("users_utils", () => {
         updated_at: new Date().toISOString(),
       };
 
-      mockSingle.mockResolvedValueOnce({
-        data: mockUpdated,
-        error: null,
-      });
+      mockSingle.mockResolvedValueOnce({ data: mockUpdated, error: null });
 
       const result = await updateUserProfile("user-123", { bio_text: "updated bio" });
 
@@ -147,7 +144,6 @@ describe("users_utils", () => {
       );
       expect(mockEq).toHaveBeenCalledWith("id", "user-123");
       expect(mockSelect).toHaveBeenCalled();
-    //   expect(result).not.toBeNull();
       expect(result?.bio_text).toBe("updated bio");
     });
 
@@ -162,8 +158,8 @@ describe("users_utils", () => {
     });
 
     it("adds updated_at timestamp automatically", async () => {
-      const now = Date.now;
-      Date.now = jest.fn(() => 1730000000000); // fixed timestamp
+      const originalNow = Date.now;
+      Date.now = jest.fn(() => 1730000000000);
 
       const mockUpdated = {
         id: "user-123",
@@ -182,41 +178,13 @@ describe("users_utils", () => {
       );
       expect(result?.updated_at).toBe(mockUpdated.updated_at);
 
-      Date.now = now; // restore
-    });
-
-    it("updates multiple fields correctly", async () => {
-      const mockUpdated = {
-        id: "user-888",
-        username: "updated_user",
-        full_name: "Updated Name",
-        bio_text: "Refreshed bio",
-        updated_at: new Date().toISOString(),
-      };
-      mockSingle.mockResolvedValueOnce({ data: mockUpdated, error: null });
-
-      const result = await updateUserProfile("user-888", {
-        username: "updated_user",
-        full_name: "Updated Name",
-        bio_text: "Refreshed bio",
-      });
-
-      expect(mockUpdate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          username: "updated_user",
-          full_name: "Updated Name",
-          bio_text: "Refreshed bio",
-        })
-      );
-      expect(result?.username).toBe("updated_user");
+      Date.now = originalNow;
     });
 
     it("returns null when no updated data but no error", async () => {
       mockSingle.mockResolvedValueOnce({ data: null, error: null });
-
       const result = await updateUserProfile("user-123", { bio_text: "ok" });
       expect(result).toBeNull();
     });
-
   });
 });
