@@ -1,5 +1,18 @@
 import { supabase } from "@/lib/supabaseClient";
-import { UserProfile } from "@/lib/types/profile_doc_types";
+
+/**
+ * Represents a user's profile row in the `profiles` table.
+ * Mirrors Supabase's public.profiles schema.
+ */
+export interface UserProfile {
+  id: string; // UUID (auth.users.id)
+  username: string;
+  full_name?: string;
+  avatar_url?: string;
+  bio_text?: string;
+  created_at?: string;
+  updated_at?: string;
+}
 
 
 // Fetch user's profile data from 'profiles' table
@@ -8,17 +21,6 @@ import { UserProfile } from "@/lib/types/profile_doc_types";
  * @returns The user's profile data, null if no record found, throws an error if supabase error
 
 Promise<Profile | null>
-
-where Profile looks like:
-{
-  id: string;
-  username: string;
-  full_name?: string;
-  avatar_url?: string;
-  bio_text?: string;
-  created_at: string;
-  updated_at: string;
-}
 */
 export async function getUserProfile(userId: string): Promise<UserProfile | null> {
   const { data, error } = await supabase
