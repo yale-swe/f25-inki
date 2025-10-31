@@ -96,13 +96,6 @@ jobs:
           echo "COVERAGE_PERCENT=${COVERAGE_PERCENT}" >> $GITHUB_ENV
           echo "coverage_percent=${COVERAGE_PERCENT}" >> $GITHUB_OUTPUT
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage/lcov.info
-          fail_ci_if_error: true
-
       - name: Post coverage comment to PR
         uses: actions/github-script@v7
         if: ${{ github.event_name == 'pull_request' }}
