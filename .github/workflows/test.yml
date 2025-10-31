@@ -92,7 +92,7 @@ jobs:
       - name: Extract Coverage Percentage
         id: extract_coverage
         run: |
-          COVERAGE_PERCENT=$(npx coverage-summary-cli -p coverage/coverage-summary.json total.lines.pct || echo "0")
+          COVERAGE_PERCENT=$(cat coverage/coverage-summary.json | jq '.total.lines.pct' 2>/dev/null || echo "0")
           echo "COVERAGE_PERCENT=${COVERAGE_PERCENT}" >> $GITHUB_ENV
           echo "coverage_percent=${COVERAGE_PERCENT}" >> $GITHUB_OUTPUT
 
