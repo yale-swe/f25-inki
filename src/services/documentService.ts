@@ -84,7 +84,6 @@ export class DocumentService {
           raw_text: input.raw_text,
           storage_bucket: input.storage_bucket,
           storage_path: input.storage_path,
-          public_id: input.public_id,
           status: 'ready'
         })
         .select()
