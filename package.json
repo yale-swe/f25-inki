@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.74.0",
+    "@tailwindcss/postcss": "^4.1.16",
     "next": "15.5.3",
     "pdfjs-dist": "^5.4.296",
     "react": "19.1.0",
