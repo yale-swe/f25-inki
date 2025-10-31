@@ -25,9 +25,9 @@ jobs:
           POSTGRES_DB: test_db
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
+          --health-cmd "pg_isready -U postgres" 
+          --health-interval 10s 
+          --health-timeout 5s 
           --health-retries 5
 
     steps:
@@ -37,8 +37,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: "npm"
+          node-version: 22
 
       - name: Install dependencies
         run: npm ci
@@ -69,28 +68,33 @@ jobs:
         env:
           NODE_ENV: test
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Build Next.js app for E2E tests
+        run: npm run build
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Run End-to-End Tests (Playwright)
         run: npm run test:e2e
         env:
           NODE_ENV: test
-          BASE_URL: ${{ secrets.PROD_URL }}
+          BASE_URL: http://localhost:3000
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Extract Coverage Percentage
         id: extract_coverage
         run: |
-          COVERAGE_PERCENT=$(npx coverage-summary-cli -p coverage/coverage-summary.json total.lines.pct || echo "0")
+          COVERAGE_PERCENT=$(cat coverage/coverage-summary.json | jq '.total.lines.pct' 2>/dev/null || echo "0")
           echo "COVERAGE_PERCENT=${COVERAGE_PERCENT}" >> $GITHUB_ENV
           echo "coverage_percent=${COVERAGE_PERCENT}" >> $GITHUB_OUTPUT
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage/lcov.info
-          fail_ci_if_error: true
 
       - name: Post coverage comment to PR
         uses: actions/github-script@v7
@@ -120,10 +124,10 @@ jobs:
           COVERAGE=${{ needs.test.outputs.coverage_percent }}
           echo "Reported coverage: ${COVERAGE}%"
           if [ "$COVERAGE" != "N/A" ] && (( $(echo "$COVERAGE < 80" | bc -l) )); then
-            echo "❌ Coverage below threshold (80%)."
+            echo "Coverage below threshold (80%)."
             exit 1
           else
-            echo "✅ Coverage meets minimum threshold."
+            echo "Coverage meets minimum threshold."
           fi
 
   e2e:
@@ -138,7 +142,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install dependencies
         run: npm ci
@@ -146,8 +150,17 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
+      - name: Build Next.js app
+        run: npm run build
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
       - name: Run Playwright E2E Tests
         run: npm run test:e2e
         env:
           NODE_ENV: test
-          BASE_URL: ${{ secrets.PROD_URL }}
+          BASE_URL: http://localhost:3000
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}

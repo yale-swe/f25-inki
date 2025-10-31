@@ -18,7 +18,7 @@ export default function LoginForm() {
 
     try {
       // Call Supabase Auth directly (no fetch)
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -28,9 +28,10 @@ export default function LoginForm() {
       setMessage("Login successful!");
       // Redirect after short delay
       setTimeout(() => router.push("/dashboard"), 1000);
-    } catch (err: any) {
-      console.error(err);
-      setMessage(`${err.message || "Login failed"}`);
+    } catch (err) {
+      const error = err as Error;
+      console.error(error);
+      setMessage(`${error.message || "Login failed"}`);
     } finally {
       setIsLoading(false);
     }
