@@ -39,25 +39,39 @@ export class DocumentService {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-
-      const { data, error } = await supabase
-        .from('documents')
-        .select('*')
-        .eq('id', id)
-        .eq('owner_id', user.id)
-        .single();
+      // fetch doc with permission level
+      const { data, error } = await supabase.rpc('get_document_info', {
+        doc_id: id
+      });
 
       if (error) {
-        if (error.code === 'PGRST116') {
-          return null;
-        }
+        console.error('Error fetching document:', error);
         throw error;
       }
 
-      return data;
+      if (!data || data.length === 0) {
+        return null;
+      }
+
+      const docData = data[0];
+      
+      // determine permission
+      let permission_level: 'owner' | 'edit' | 'comment' | 'view' | 'public' | null = null;
+      
+      if (user && docData.owner_id === user.id) {
+        permission_level = 'owner';
+      } else if (docData.permission_level) {
+        permission_level = docData.permission_level;
+      } else if (docData.is_public && !user) {
+        permission_level = 'public';
+      } else if (docData.is_public && user) {
+        permission_level = 'view';
+      }
+
+      return {
+        ...docData,
+        permission_level
+      };
     } catch (error) {
       console.error('Error fetching document:', error);
       throw error;
