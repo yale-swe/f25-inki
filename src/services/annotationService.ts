@@ -40,17 +40,17 @@ export class AnnotationService {
 
   static async createHighlight(input: CreateHighlightInput): Promise<Annotation> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data, error: authError } = await supabase.auth.getUser();
       
-      if (!user) {
+      if (authError || !data?.user) {
         throw new Error('User not authenticated');
       }
 
-      const { data, error } = await supabase
+      const { data: annotationData, error } = await supabase
         .from('annotations')
         .insert({
           document_id: input.document_id,
-          user_id: user.id,
+          user_id: data.user.id,
           type: 'highlight',
           parent_id: null,
           content: null,
@@ -66,7 +66,7 @@ export class AnnotationService {
         throw error;
       }
 
-      return data;
+      return annotationData;
     } catch (error) {
       console.error('Error in createHighlight:', error);
       throw error;
@@ -75,17 +75,17 @@ export class AnnotationService {
 
   static async createComment(input: CreateCommentInput): Promise<Annotation> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data, error: authError } = await supabase.auth.getUser();
       
-      if (!user) {
+      if (authError || !data?.user) {
         throw new Error('User not authenticated');
       }
 
-      const { data, error } = await supabase
+      const { data: annotationData, error } = await supabase
         .from('annotations')
         .insert({
           document_id: input.document_id,
-          user_id: user.id,
+          user_id: data.user.id,
           type: 'comment',
           parent_id: input.parent_id,
           content: input.content,
@@ -101,7 +101,7 @@ export class AnnotationService {
         throw error;
       }
 
-      return data;
+      return annotationData;
     } catch (error) {
       console.error('Error in createComment:', error);
       throw error;
@@ -110,9 +110,9 @@ export class AnnotationService {
 
   static async deleteAnnotation(annotationId: string): Promise<void> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data, error: authError } = await supabase.auth.getUser();
       
-      if (!user) {
+      if (authError || !data?.user) {
         throw new Error('User not authenticated');
       }
 

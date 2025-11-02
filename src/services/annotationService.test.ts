@@ -5,8 +5,7 @@ import type {
   AnnotationWithUser, 
   CreateHighlightInput, 
   CreateCommentInput,
-  PermissionLevel,
-  AnnotationPermissions 
+  PermissionLevel
 } from '@/lib/types/annotation';
 
 const mockChannelMethod = jest.fn();
@@ -44,8 +43,10 @@ describe('AnnotationService', () => {
       delete: jest.fn(),
       single: jest.fn(),
       then: jest.fn((onResolve?: (value: unknown) => unknown, onReject?: (reason?: unknown) => unknown) => {
-        const result = Promise.resolve(resolveValue);
-        return result.then(onResolve, onReject);
+        return Promise.resolve(resolveValue).then(onResolve, onReject);
+      }) as unknown as jest.Mock,
+      catch: jest.fn((onReject?: (reason?: unknown) => unknown) => {
+        return Promise.resolve(resolveValue).catch(onReject);
       }),
       _setResolveValue: (value: { data?: unknown; error?: Error | null }) => {
         resolveValue = value;
@@ -71,6 +72,11 @@ describe('AnnotationService', () => {
     mockQuery._setResolveValue({ data: null, error: null });
     
     (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+    
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: 'default-user' } },
+      error: null
+    });
   });
 
   describe('getAnnotations', () => {
