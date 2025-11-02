@@ -114,6 +114,7 @@ export default function DocumentViewer({ documentId }: DocumentViewerProps) {
         selection_end: selection.end,
         selection_text: selection.text
       });
+      await loadAnnotations();
     } catch (err) {
       console.error('Failed to create highlight:', err);
       alert('Failed to create highlight. Please try again.');
@@ -127,6 +128,7 @@ export default function DocumentViewer({ documentId }: DocumentViewerProps) {
         parent_id: parentId,
         content
       });
+      await loadAnnotations();
     } catch (err) {
       console.error('Failed to add comment:', err);
       throw err;
@@ -136,6 +138,7 @@ export default function DocumentViewer({ documentId }: DocumentViewerProps) {
   const handleDeleteAnnotation = async (annotationId: string) => {
     try {
       await AnnotationService.deleteAnnotation(annotationId);
+      await loadAnnotations();
     } catch (err) {
       console.error('Failed to delete annotation:', err);
       throw err;
