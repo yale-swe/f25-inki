@@ -21,25 +21,56 @@ jest.mock('@/lib/supabaseClient', () => ({
   }
 }));
 
+interface MockQueryBuilder {
+  select: jest.Mock;
+  eq: jest.Mock;
+  order: jest.Mock;
+  insert: jest.Mock;
+  delete: jest.Mock;
+  single: jest.Mock;
+  then: jest.Mock;
+  _setResolveValue: (value: { data?: unknown; error?: Error | null }) => void;
+}
+
 describe('AnnotationService', () => {
-  const mockQuery = {
-    select: jest.fn(),
-    eq: jest.fn(),
-    order: jest.fn(),
-    insert: jest.fn(),
-    delete: jest.fn(),
-    single: jest.fn()
+  const createMockQuery = (): MockQueryBuilder => {
+    let resolveValue: { data?: unknown; error?: Error | null } = { data: null, error: null };
+    
+    const queryBuilder = {
+      select: jest.fn(),
+      eq: jest.fn(),
+      order: jest.fn(),
+      insert: jest.fn(),
+      delete: jest.fn(),
+      single: jest.fn(),
+      then: jest.fn((onResolve?: (value: unknown) => unknown, onReject?: (reason?: unknown) => unknown) => {
+        const result = Promise.resolve(resolveValue);
+        return result.then(onResolve, onReject);
+      }),
+      _setResolveValue: (value: { data?: unknown; error?: Error | null }) => {
+        resolveValue = value;
+      }
+    };
+    
+    return queryBuilder as MockQueryBuilder;
   };
 
+  let mockQuery: MockQueryBuilder;
+
   beforeEach(() => {
+    mockQuery = createMockQuery();
     jest.clearAllMocks();
-    (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+    
     mockQuery.select.mockReturnValue(mockQuery);
-    mockQuery.eq.mockReturnValue(mockQuery);
+    mockQuery.eq.mockImplementation(() => mockQuery);
     mockQuery.order.mockReturnValue(mockQuery);
     mockQuery.insert.mockReturnValue(mockQuery);
     mockQuery.delete.mockReturnValue(mockQuery);
     mockQuery.single.mockReturnValue(mockQuery);
+    
+    mockQuery._setResolveValue({ data: null, error: null });
+    
+    (supabase.from as jest.Mock).mockReturnValue(mockQuery);
   });
 
   describe('getAnnotations', () => {
@@ -66,7 +97,7 @@ describe('AnnotationService', () => {
         }
       ];
 
-      mockQuery.order.mockResolvedValue({
+      mockQuery._setResolveValue({
         data: mockAnnotations,
         error: null
       });
@@ -84,7 +115,7 @@ describe('AnnotationService', () => {
       const documentId = 'doc-123';
       const error = new Error('Database error');
 
-      mockQuery.order.mockResolvedValue({
+      mockQuery._setResolveValue({
         data: null,
         error
       });
@@ -95,7 +126,7 @@ describe('AnnotationService', () => {
     it('should return empty array when no annotations found', async () => {
       const documentId = 'doc-123';
 
-      mockQuery.order.mockResolvedValue({
+      mockQuery._setResolveValue({
         data: [],
         error: null
       });
@@ -134,7 +165,7 @@ describe('AnnotationService', () => {
         error: null
       });
 
-      mockQuery.single.mockResolvedValue({
+      mockQuery._setResolveValue({
         data: mockAnnotation,
         error: null
       });
@@ -186,7 +217,7 @@ describe('AnnotationService', () => {
       });
 
       const error = new Error('Database error');
-      mockQuery.single.mockResolvedValue({
+      mockQuery._setResolveValue({
         data: null,
         error
       });
@@ -223,7 +254,7 @@ describe('AnnotationService', () => {
         error: null
       });
 
-      mockQuery.single.mockResolvedValue({
+      mockQuery._setResolveValue({
         data: mockAnnotation,
         error: null
       });
@@ -273,7 +304,7 @@ describe('AnnotationService', () => {
       });
 
       const error = new Error('Database error');
-      mockQuery.single.mockResolvedValue({
+      mockQuery._setResolveValue({
         data: null,
         error
       });
@@ -292,7 +323,7 @@ describe('AnnotationService', () => {
         error: null
       });
 
-      mockQuery.eq.mockResolvedValue({
+      mockQuery._setResolveValue({
         error: null
       });
 
@@ -324,7 +355,7 @@ describe('AnnotationService', () => {
       });
 
       const error = new Error('Database error');
-      mockQuery.eq.mockResolvedValue({
+      mockQuery._setResolveValue({
         error
       });
 
