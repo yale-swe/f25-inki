@@ -135,7 +135,7 @@ export default function CommentThread({
                   </button>
                 )}
               </div>
-              <p className="text-sm text-gray-800 mt-1 whitespace-pre-wrap">{comment.content}</p>
+              <p className="text-sm text-gray-900 mt-1 whitespace-pre-wrap">{comment.content}</p>
             </div>
 
             {isDeleting && (
@@ -171,7 +171,7 @@ export default function CommentThread({
                   value={replyContent}
                   onChange={(e) => setReplyContent(e.target.value)}
                   placeholder="Write a reply..."
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                  className="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                   rows={2}
                   autoFocus
                 />
@@ -277,7 +277,7 @@ export default function CommentThread({
             value={replyContent}
             onChange={(e) => setReplyContent(e.target.value)}
             placeholder="Write a comment..."
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+            className="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
             rows={3}
             autoFocus
           />
