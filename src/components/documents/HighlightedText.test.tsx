@@ -69,11 +69,11 @@ describe('HighlightedText', () => {
       }
     ];
 
-    render(<HighlightedText {...defaultProps} annotations={annotations} />);
+    const { container } = render(<HighlightedText {...defaultProps} annotations={annotations} />);
 
-    const container = screen.getByText(defaultProps.text);
-    expect(container).toBeInTheDocument();
-    expect(container.innerHTML).toContain('annotation-highlight');
+    const documentText = container.querySelector('.document-text');
+    expect(documentText).toBeInTheDocument();
+    expect(documentText?.innerHTML).toContain('annotation-highlight');
   });
 
   it('should apply selected state to annotation', () => {
@@ -98,7 +98,7 @@ describe('HighlightedText', () => {
       }
     ];
 
-    render(
+    const { container } = render(
       <HighlightedText
         {...defaultProps}
         annotations={annotations}
@@ -106,9 +106,9 @@ describe('HighlightedText', () => {
       />
     );
 
-    const container = screen.getByText(defaultProps.text);
-    expect(container.innerHTML).toContain('bg-yellow-300');
-    expect(container.innerHTML).toContain('ring-2');
+    const documentText = container.querySelector('.document-text');
+    expect(documentText?.innerHTML).toContain('bg-yellow-300');
+    expect(documentText?.innerHTML).toContain('ring-2');
   });
 
   it('should show comment indicator when annotation has comments', () => {
@@ -151,10 +151,10 @@ describe('HighlightedText', () => {
       }
     ];
 
-    render(<HighlightedText {...defaultProps} annotations={annotations} />);
+    const { container } = render(<HighlightedText {...defaultProps} annotations={annotations} />);
 
-    const container = screen.getByText(defaultProps.text);
-    expect(container.innerHTML).toContain('border-b-2 border-yellow-600');
+    const documentText = container.querySelector('.document-text');
+    expect(documentText?.innerHTML).toContain('border-b-2 border-yellow-600');
   });
 
   it('should highlight multiple non-overlapping annotations', () => {
@@ -197,11 +197,11 @@ describe('HighlightedText', () => {
       }
     ];
 
-    render(<HighlightedText {...defaultProps} annotations={annotations} />);
+    const { container } = render(<HighlightedText {...defaultProps} annotations={annotations} />);
 
-    const container = screen.getByText(defaultProps.text);
-    const highlights = container.querySelectorAll('.annotation-highlight');
-    expect(highlights.length).toBeGreaterThan(0);
+    const documentText = container.querySelector('.document-text');
+    const highlights = documentText?.querySelectorAll('.annotation-highlight');
+    expect(highlights!.length).toBeGreaterThan(0);
   });
 
   it('should filter out comment annotations from highlights', () => {
@@ -244,17 +244,17 @@ describe('HighlightedText', () => {
       }
     ];
 
-    render(<HighlightedText {...defaultProps} annotations={annotations} />);
+    const { container } = render(<HighlightedText {...defaultProps} annotations={annotations} />);
 
-    const container = screen.getByText(defaultProps.text);
-    expect(container.innerHTML).toContain('annotation-highlight');
+    const documentText = container.querySelector('.document-text');
+    expect(documentText?.innerHTML).toContain('annotation-highlight');
   });
 
   it('should apply search highlighting', () => {
-    render(<HighlightedText {...defaultProps} searchTerm="test" />);
+    const { container } = render(<HighlightedText {...defaultProps} searchTerm="test" />);
 
-    const container = screen.getByText(defaultProps.text);
-    expect(container.innerHTML).toContain('<mark');
+    const documentText = container.querySelector('.document-text');
+    expect(documentText?.innerHTML).toContain('<mark');
   });
 
   it('should handle search highlighting with empty text nodes', () => {
@@ -282,10 +282,10 @@ describe('HighlightedText', () => {
 
   it('should escape regex special characters in search', () => {
     const text = 'Test with . * + ? characters';
-    render(<HighlightedText {...defaultProps} text={text} searchTerm=". * + ?" />);
+    const { container } = render(<HighlightedText {...defaultProps} text={text} searchTerm=". * + ?" />);
 
-    const container = screen.getByText(text);
-    expect(container).toBeInTheDocument();
+    const documentText = container.querySelector('.document-text');
+    expect(documentText).toBeInTheDocument();
   });
 
   it('should normalize text (remove extra newlines)', () => {
