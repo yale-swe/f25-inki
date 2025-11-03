@@ -18,7 +18,7 @@ export default function SignupPage() {
 
     try {
       // Use Supabase to create the user
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
       });
@@ -28,9 +28,10 @@ export default function SignupPage() {
       setMessage("Account created successfully! Check your email to confirm.");
       // Optional: redirect after short delay
       setTimeout(() => router.push("/login"), 1500);
-    } catch (err: any) {
-      console.error(err);
-      setMessage(`${err.message || "Error creating account"}`);
+    } catch (err) {
+      const error = err as Error;
+      console.error(error);
+      setMessage(`${error.message || "Error creating account"}`);
     } finally {
       setIsLoading(false);
     }
