@@ -39,8 +39,13 @@ export default function LoginForm() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6 text-center text-gray-600">Welcome Back</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col space-y-4 text-gray-400">
+      <h1 className="text-2xl font-bold mb-6 text-center text-gray-600">
+        Welcome Back
+      </h1>
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col space-y-4 text-gray-400"
+      >
         <input
           type="email"
           placeholder="Email"

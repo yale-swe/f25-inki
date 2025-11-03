@@ -10,6 +10,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:coverage:open": "jest --coverage && open coverage/lcov-report/index.html",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed"
@@ -22,6 +23,7 @@
     "pdfjs-dist": "^5.4.296",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "tr46": "^6.0.0",
     "ts-node": "^10.9.2"
   },
   "devDependencies": {

@@ -5,12 +5,17 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Copy, Check, Link2 } from "lucide-react";
 
-
 interface ShareLinkButtonProps {
   documentId: string; // ID of the document we want to share
+  variant?: "primary" | "icon"; // icon variant for minimal dashboard styling
+  className?: string;
 }
 
-export default function ShareLinkButton({ documentId }: ShareLinkButtonProps) {
+export default function ShareLinkButton({
+  documentId,
+  variant = "primary",
+  className = "",
+}: ShareLinkButtonProps) {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -91,11 +96,28 @@ export default function ShareLinkButton({ documentId }: ShareLinkButtonProps) {
     }
   };
 
+  if (variant === "icon") {
+    return (
+      <button
+        onClick={handleGenerateLink}
+        disabled={loading}
+        className={`p-2 rounded-md neu-outset text-gray-700 disabled:opacity-60 ${className}`}
+        aria-label="Share"
+      >
+        {copied ? (
+          <Check className="h-4 w-4 text-green-600" />
+        ) : (
+          <Link2 className="h-4 w-4 animate-pulse text-gray-400" />
+        )}
+      </button>
+    );
+  }
+
   return (
     <button
       onClick={handleGenerateLink}
       disabled={loading}
-      className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-60"
+      className={`flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white disabled:opacity-60 ${className}`}
     >
       {copied ? (
         <>
@@ -103,7 +125,8 @@ export default function ShareLinkButton({ documentId }: ShareLinkButtonProps) {
         </>
       ) : loading ? (
         <>
-          <Link2 className="h-4 w-4 animate-pulse text-gray-400" /> Generating...
+          <Link2 className="h-4 w-4 animate-pulse text-gray-200" />{" "}
+          Generating...
         </>
       ) : (
         <>
