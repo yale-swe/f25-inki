@@ -15,6 +15,7 @@ export interface Document {
   raw_text: string | null;
   created_at: string;
   updated_at: string;
+  permission_level?: 'owner' | 'edit' | 'comment' | 'view' | 'public' | null;
 }
 
 export interface DocumentUpload {
