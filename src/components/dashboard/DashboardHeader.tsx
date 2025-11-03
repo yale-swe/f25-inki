@@ -1,19 +1,20 @@
 "use client";
 
+import { Plus } from "lucide-react";
+
 // Temporary type - will be replaced after merge
 type ViewMode = "gallery" | "list";
-import { Plus } from "lucide-react";
 
 interface DashboardHeaderProps {
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
-  onAddReading: () => void;
+  onOpenDocuments?: () => void;
 }
 
 export default function DashboardHeader({
   viewMode,
   onViewModeChange,
-  onAddReading,
+  onOpenDocuments,
 }: DashboardHeaderProps) {
   return (
     <div className="px-3">
@@ -67,7 +68,7 @@ export default function DashboardHeader({
           </div>
 
           <button
-            onClick={onAddReading}
+            onClick={onOpenDocuments}
             className="px-3.5 py-1.5 rounded-md font-medium flex items-center gap-2 neu-outset"
           >
             <Plus className="w-5 h-5" />

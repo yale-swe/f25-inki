@@ -8,16 +8,6 @@ interface ReadingGridProps {
 }
 
 export default function ReadingGrid({ readings }: ReadingGridProps) {
-  const handleDelete = (id: string) => {
-    console.log("Delete reading:", id);
-    // TODO: Implement actual delete functionality
-  };
-
-  const handleShare = (id: string) => {
-    console.log("Share reading:", id);
-    // TODO: Implement actual share functionality
-  };
-
   if (readings.length === 0) {
     return (
       <div className="text-center py-12">
@@ -48,12 +38,7 @@ export default function ReadingGrid({ readings }: ReadingGridProps) {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {readings.map((reading) => (
         <div key={reading.id} className="neu-outset rounded-lg">
-          <ReadingItem
-            reading={reading}
-            viewMode="gallery"
-            onDelete={handleDelete}
-            onShare={handleShare}
-          />
+          <ReadingItem reading={reading} viewMode="gallery" />
         </div>
       ))}
     </div>

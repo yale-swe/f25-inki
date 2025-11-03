@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { getUserProfile } from "@/lib/utils/users_utils";
 import {
   LayoutDashboard,
   BookOpen,
@@ -18,6 +20,49 @@ interface SidebarProps {
 
 export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [userName, setUserName] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [userInitials, setUserInitials] = useState<string>("U");
+
+  useEffect(() => {
+    async function loadUserData() {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Get user email from auth
+        setUserEmail(user.email || "");
+
+        // Get user profile for name
+        const profile = await getUserProfile(user.id);
+        if (profile) {
+          const name = profile.full_name || profile.username || "";
+          setUserName(name);
+
+          // Generate initials
+          const initials =
+            name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .toUpperCase()
+              .slice(0, 2) || profile.username.slice(0, 2).toUpperCase();
+          setUserInitials(initials);
+        } else {
+          // Fallback to email username
+          const emailName = user.email?.split("@")[0] || "User";
+          setUserName(emailName);
+          setUserInitials(emailName.slice(0, 2).toUpperCase());
+        }
+      } catch (err) {
+        console.error("Error loading user data:", err);
+      }
+    }
+
+    loadUserData();
+  }, []);
 
   const navigationItems = [
     {
@@ -85,12 +130,16 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
         </div>
         <div className="flex items-center gap-3 p-4">
           <div className="w-8 h-8 rounded-full flex items-center justify-center neu-outset">
-            <span className="text-sm font-medium">JD</span>
+            <span className="text-sm font-medium">{userInitials}</span>
           </div>
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">John Doe</p>
-              <p className="text-xs text-gray-500 truncate">john@example.com</p>
+              <p className="text-sm font-medium truncate">
+                {userName || "User"}
+              </p>
+              <p className="text-xs text-gray-500 truncate">
+                {userEmail || ""}
+              </p>
             </div>
           )}
         </div>

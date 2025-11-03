@@ -2,6 +2,8 @@
 
 import { Reading } from "@/lib/dummyData";
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import ShareLinkButton from "@/components/ShareLinkButton";
 
 interface ReadingListCondensedProps {
   readings: Reading[];
@@ -13,6 +15,7 @@ export default function ReadingListCondensed({
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -30,11 +33,6 @@ export default function ReadingListCondensed({
   const handleDelete = (id: string) => {
     console.log("Delete reading:", id);
     // TODO: Implement actual delete functionality
-  };
-
-  const handleShare = (id: string) => {
-    console.log("Share reading:", id);
-    // TODO: Implement actual share functionality
   };
 
   const toggleSelection = (id: string) => {
@@ -128,9 +126,19 @@ export default function ReadingListCondensed({
         {readings.map((reading) => (
           <div
             key={reading.id}
-            className={`px-6 py-4 ${
+            className={`px-6 py-4 cursor-pointer ${
               selectedItems.includes(reading.id) ? "bg-pink-50" : ""
             }`}
+            onClick={(e) => {
+              const target = e.target as HTMLElement;
+              if (
+                target.closest("button") ||
+                target.closest("input") ||
+                target.closest("[data-no-nav]")
+              )
+                return;
+              router.push(`/documents/${reading.id}`);
+            }}
           >
             <div className="grid grid-cols-12 gap-4 items-center">
               <div className="col-span-1">
@@ -144,29 +152,21 @@ export default function ReadingListCondensed({
 
               <div className="col-span-5 flex items-center gap-3">
                 <div className="flex-shrink-0">
-                  {reading.thumbnail ? (
-                    <img
-                      src={reading.thumbnail}
-                      alt={reading.title}
-                      className="w-8 h-8 object-cover rounded"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center">
-                      <svg
-                        className="w-4 h-4 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                    </div>
-                  )}
+                  <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center">
+                    <svg
+                      className="w-4 h-4 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                  </div>
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-gray-900 truncate">
@@ -201,7 +201,7 @@ export default function ReadingListCondensed({
               </div>
 
               <div className="col-span-1">
-                <div className="relative" ref={menuRef}>
+                <div className="relative" ref={menuRef} data-no-nav>
                   <button
                     onClick={() =>
                       setOpenMenuId(
@@ -209,6 +209,7 @@ export default function ReadingListCondensed({
                       )
                     }
                     className="p-1 text-gray-500"
+                    aria-label="More actions"
                   >
                     <svg
                       className="w-4 h-4"
@@ -226,30 +227,12 @@ export default function ReadingListCondensed({
                   </button>
 
                   {openMenuId === reading.id && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg border border-gray-200 z-50">
                       <div className="py-1">
-                        <button
-                          onClick={() => {
-                            handleShare(reading.id);
-                            setOpenMenuId(null);
-                          }}
-                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          <svg
-                            className="w-4 h-4 mr-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
-                            />
-                          </svg>
-                          Share
-                        </button>
+                        <div className="px-2 py-1">
+                          {/* Reuse ShareLinkButton for actual share link generation */}
+                          <ShareLinkButton documentId={reading.id} />
+                        </div>
                         <button
                           onClick={() => {
                             handleDelete(reading.id);
