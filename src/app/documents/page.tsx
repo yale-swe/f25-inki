@@ -7,6 +7,7 @@ import { Document } from '@/lib/types/document';
 import { DocumentService } from '@/services/documentService';
 import DocumentUpload from '@/components/documents/DocumentUpload';
 import { formatFileSize, formatDateShort } from '@/lib/utils/helpers';
+import ShareLinkButton from "@/components/ShareLinkButton";
 
 export default function DocumentsPage() {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -172,7 +173,13 @@ export default function DocumentsPage() {
                   >
                     View
                   </Link>
+
+                  {/*  Add Share Button */}
+                  <div className="flex-1">
+                    <ShareLinkButton documentId={doc.id} />
+                  </div>
                 </div>
+
               </div>
             ))}
           </div>
