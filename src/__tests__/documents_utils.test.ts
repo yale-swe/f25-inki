@@ -11,7 +11,6 @@ import {
 } from "@/lib/utils/documents_render_utils";
 import { supabase } from "@/lib/supabaseClient";
 
-
 // Jest mock setup
 jest.mock("@/lib/supabaseClient", () => ({
   supabase: {
@@ -86,9 +85,13 @@ describe("documents_render_utils", () => {
       const result = await getUserDocuments("user-123");
 
       expect(supabase.from).toHaveBeenCalledWith("documents");
-      expect(mockSelect).toHaveBeenCalledWith("*");
+      expect(mockSelect).toHaveBeenCalledWith(
+        expect.stringContaining("id, owner_id, title")
+      );
       expect(mockEq).toHaveBeenCalledWith("owner_id", "user-123");
-      expect(mockOrder).toHaveBeenCalledWith("updated_at", { ascending: false });
+      expect(mockOrder).toHaveBeenCalledWith("updated_at", {
+        ascending: false,
+      });
       expect(result).toHaveLength(2);
       expect(result[0].title).toBe("My Document");
       expect(result[1].title).toBe("Another Doc");
@@ -122,8 +125,15 @@ describe("documents_render_utils", () => {
     it("returns shared documents in nested format", async () => {
       const mockSharedDocs = [
         {
+          id: "share-001",
           document_id: "doc-shared-001",
+          shared_with_user_id: "user-123",
           permission_level: "edit" as const,
+          created_at: "2025-01-01T00:00:00Z",
+          updated_at: "2025-01-02T00:00:00Z",
+          share_token: null,
+          expires_at: null,
+          is_active: true,
           documents: {
             id: "doc-shared-001",
             owner_id: "user-456",
@@ -134,7 +144,7 @@ describe("documents_render_utils", () => {
             page_count: 15,
             storage_path: "docs/shared.pdf",
           },
-          shared_by: { username: "alice", full_name: "Alice Smith" },
+          shared_by_profile: { username: "alice", full_name: "Alice Smith" },
         },
       ];
 
@@ -144,7 +154,9 @@ describe("documents_render_utils", () => {
 
       expect(supabase.from).toHaveBeenCalledWith("document_shares");
       expect(mockEq).toHaveBeenCalledWith("shared_with_user_id", "user-123");
-      expect(mockOrder).toHaveBeenCalledWith("updated_at", { ascending: false });
+      expect(mockOrder).toHaveBeenCalledWith("updated_at", {
+        ascending: false,
+      });
       expect(result).toHaveLength(1);
       expect(result[0].documents.title).toBe("Shared Whitepaper");
       expect(result[0].shared_by.username).toBe("alice");
@@ -153,16 +165,30 @@ describe("documents_render_utils", () => {
     it("handles multiple shared documents", async () => {
       const mockSharedDocs = [
         {
+          id: "share-001",
           document_id: "doc-001",
+          shared_with_user_id: "user-123",
           permission_level: "view" as const,
+          created_at: "2025-01-01T00:00:00Z",
+          updated_at: "2025-01-02T00:00:00Z",
+          share_token: null,
+          expires_at: null,
+          is_active: true,
           documents: { id: "doc-001", title: "Document 1", status: "ready" },
-          shared_by: { username: "bob", full_name: "Bob Jones" },
+          shared_by_profile: { username: "bob", full_name: "Bob Jones" },
         },
         {
+          id: "share-002",
           document_id: "doc-002",
+          shared_with_user_id: "user-123",
           permission_level: "comment" as const,
+          created_at: "2025-01-01T00:00:00Z",
+          updated_at: "2025-01-02T00:00:00Z",
+          share_token: null,
+          expires_at: null,
+          is_active: true,
           documents: { id: "doc-002", title: "Document 2", status: "ready" },
-          shared_by: { username: "carol", full_name: "Carol White" },
+          shared_by_profile: { username: "carol", full_name: "Carol White" },
         },
       ];
 
@@ -202,8 +228,15 @@ describe("documents_render_utils", () => {
     it("returns flattened shared documents when flatten=true", async () => {
       const mockSharedDocs = [
         {
+          id: "share-001",
           document_id: "doc-shared-001",
+          shared_with_user_id: "user-123",
           permission_level: "edit" as const,
+          created_at: "2025-01-01T00:00:00Z",
+          updated_at: "2025-01-02T00:00:00Z",
+          share_token: null,
+          expires_at: null,
+          is_active: true,
           documents: {
             id: "doc-shared-001",
             owner_id: "user-456",
@@ -216,7 +249,7 @@ describe("documents_render_utils", () => {
             file_size: 2048,
             storage_bucket: "documents",
           },
-          shared_by: { username: "alice", full_name: "Alice Smith" },
+          shared_by_profile: { username: "alice", full_name: "Alice Smith" },
         },
       ];
 
@@ -236,16 +269,30 @@ describe("documents_render_utils", () => {
     it("flattens multiple documents correctly", async () => {
       const mockSharedDocs = [
         {
+          id: "share-001",
           document_id: "doc-001",
+          shared_with_user_id: "user-123",
           permission_level: "view" as const,
+          created_at: "2025-01-01T00:00:00Z",
+          updated_at: "2025-01-02T00:00:00Z",
+          share_token: null,
+          expires_at: null,
+          is_active: true,
           documents: { id: "doc-001", title: "Doc 1", status: "ready" },
-          shared_by: { username: "bob", full_name: "Bob Jones" },
+          shared_by_profile: { username: "bob", full_name: "Bob Jones" },
         },
         {
+          id: "share-002",
           document_id: "doc-002",
+          shared_with_user_id: "user-123",
           permission_level: "edit" as const,
+          created_at: "2025-01-01T00:00:00Z",
+          updated_at: "2025-01-02T00:00:00Z",
+          share_token: null,
+          expires_at: null,
+          is_active: true,
           documents: { id: "doc-002", title: "Doc 2", status: "processing" },
-          shared_by: { username: "carol", full_name: "Carol White" },
+          shared_by_profile: { username: "carol", full_name: "Carol White" },
         },
       ];
 
@@ -262,8 +309,15 @@ describe("documents_render_utils", () => {
     it("preserves all document fields when flattening", async () => {
       const mockSharedDocs = [
         {
+          id: "share-001",
           document_id: "doc-001",
+          shared_with_user_id: "user-123",
           permission_level: "comment" as const,
+          created_at: "2025-01-01T00:00:00Z",
+          updated_at: "2025-01-02T00:00:00Z",
+          share_token: null,
+          expires_at: null,
+          is_active: true,
           documents: {
             id: "doc-001",
             owner_id: "user-456",
@@ -278,7 +332,7 @@ describe("documents_render_utils", () => {
             bytes: 512,
             raw_text_bytes: 256,
           },
-          shared_by: { username: "dan", full_name: "Dan Lee" },
+          shared_by_profile: { username: "dan", full_name: "Dan Lee" },
         },
       ];
 
