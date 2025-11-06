@@ -39,7 +39,7 @@ export default function SignupPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6 text-center text-gray-600">
+      <h1 className="text-2xl font-bold mb-6 text-center text-gray-900">
         Sign Up
       </h1>
       <form

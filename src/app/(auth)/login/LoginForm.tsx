@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function LoginForm() {
@@ -10,6 +10,10 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Read redirect param or fallback to dashboard
+  const redirect = searchParams.get("redirect") || "/dashboard";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +21,6 @@ export default function LoginForm() {
     setMessage("");
 
     try {
-      // Call Supabase Auth directly (no fetch)
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -26,12 +29,15 @@ export default function LoginForm() {
       if (error) throw error;
 
       setMessage("Login successful!");
-      // Redirect after short delay
-      setTimeout(() => router.push("/dashboard"), 1000);
+
+      // short delay for UX, then redirect back where they came from
+      setTimeout(() => {
+        router.push(redirect);
+      }, 800);
     } catch (err) {
       const error = err as Error;
       console.error(error);
-      setMessage(`${error.message || "Login failed"}`);
+      setMessage(error.message || "Login failed");
     } finally {
       setIsLoading(false);
     }
@@ -39,7 +45,7 @@ export default function LoginForm() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6 text-center text-gray-600">
+      <h1 className="text-2xl font-bold mb-6 text-center text-gray-900">
         Welcome Back
       </h1>
       <form

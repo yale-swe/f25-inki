@@ -34,5 +34,44 @@ export default async function SharedDocumentPage({
 
   const documentId = data[0].id;
 
+  // Get the original share (the one with the token)
+  const { data: originalShare } = await supabase
+    .from('document_shares')
+    .select('id, shared_with_user_id, shared_by, document_id')
+    .eq('share_token', token)
+    .eq('is_active', true)
+    .single();
+
+  if (!originalShare) {
+    return (
+      <div className="flex h-screen items-center justify-center text-red-500">
+        Share not found.
+      </div>
+    );
+  }
+
+  // Check if THIS USER already has access to this document (don't create duplicates)
+  const { data: userAccess } = await supabase
+    .from('document_shares')
+    .select('id')
+    .eq('document_id', documentId)
+    .eq('shared_with_user_id', user.id)
+    .eq('is_active', true)
+    .maybeSingle();
+
+  // If user doesn't have access yet, create a new share record for them
+  if (!userAccess) {
+    await supabase
+      .from('document_shares')
+      .insert({
+        document_id: originalShare.document_id,
+        shared_by: originalShare.shared_by,
+        shared_with_user_id: user.id,
+        permission_level: 'view',
+        share_token: null, // No token - this is a claimed share
+        is_active: true,
+      });
+  }
+
   return <DocumentViewer documentId={documentId} />;
 }

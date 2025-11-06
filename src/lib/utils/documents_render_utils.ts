@@ -107,31 +107,41 @@ export async function getSharedDocuments(
 // Implementation
 export async function getSharedDocuments(
   userId: string,
-  flatten = false
+  flatten: boolean = false
 ): Promise<SharedDocumentRow[] | FlattenedSharedDocument[]> {
   const { data, error } = await supabase
-    .from("document_shares")
-    .select(
-      `
+    .from('document_shares')
+    .select(`
       id,
       document_id,
       shared_with_user_id,
       permission_level,
       created_at,
       updated_at,
-      shared_by,
       share_token,
       expires_at,
       is_active,
-      documents!inner (
-        id, owner_id, title, file_path, file_size, mime_type, created_at, updated_at,
-        public_id, storage_bucket, storage_path, bytes, page_count, status, raw_text, public_access
+      shared_by,
+      shared_by_profile:shared_by (
+        id,
+        username,
+        full_name
       ),
-      shared_by_profile:profiles!document_shares_shared_by_fkey ( username, full_name )
-    `
-    )
-    .eq("shared_with_user_id", userId)
-    .order("updated_at", { ascending: false });
+      documents (
+        id,
+        owner_id,
+        title,
+        created_at,
+        updated_at,
+        storage_path,
+        file_path,
+        mime_type,
+        page_count,
+        status
+      )
+    `)
+    .eq('shared_with_user_id', userId)
+    .eq('is_active', true);
 
   if (error) {
     console.error("Error fetching shared documents:", error);
