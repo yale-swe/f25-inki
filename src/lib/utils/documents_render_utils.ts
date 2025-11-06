@@ -141,7 +141,8 @@ export async function getSharedDocuments(
       )
     `)
     .eq('shared_with_user_id', userId)
-    .eq('is_active', true);
+    .eq('is_active', true)
+    .order('updated_at', { ascending: false });
 
   if (error) {
     console.error("Error fetching shared documents:", error);
