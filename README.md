@@ -32,3 +32,20 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+
+## Test Coverage
+For this milestone, we measured test coverage for our project using Jest (unit/component tests) and Playwright (end-to-end tests).
+
+Our test suite achieved the following coverage:
+
+- 96.83% Statements
+
+- 88.64% Branches
+
+- 90% Functions
+
+- 96.83% Lines
+
+Coverage reports can be found under:
+`/coverage/lcov-report/index.html`
