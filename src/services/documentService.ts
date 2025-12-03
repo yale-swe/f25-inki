@@ -1,7 +1,8 @@
-// Service layer for all document CRUD operations 
+// Service layer for all document CRUD operations
 
 import { supabase } from '@/lib/supabaseClient';
 import { Document, DocumentCreateInput } from '@/lib/types/document';
+import { OpenAIService } from '@/lib/openai/openaiService';
 
 export class DocumentService {
   static async getUserDocuments(): Promise<Document[]> {
@@ -237,6 +238,16 @@ export class DocumentService {
       }
     } catch (error) {
       console.error('Error finalizing document:', error);
+      throw error;
+    }
+  }
+
+  static async getSummary(documentId: string): Promise<string> {
+    try {
+      const summary = await OpenAIService.generateSummary(documentId);
+      return summary;
+    } catch (error) {
+      console.error('Error getting summary:', error);
       throw error;
     }
   }
