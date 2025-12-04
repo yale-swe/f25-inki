@@ -1,15 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function LoginForm() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const redirectTo = params.get("redirect") ?? "/dashboard";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +20,6 @@ export default function LoginForm() {
     setMessage("");
 
     try {
-      // Call Supabase Auth directly (no fetch)
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -25,9 +27,13 @@ export default function LoginForm() {
 
       if (error) throw error;
 
-      setMessage("Login successful!");
-      // Redirect after short delay
-      setTimeout(() => router.push("/dashboard"), 1000);
+      // setMessage("Login successful!");
+      // setTimeout(() => router.push("/dashboard"), 1000);
+      // setMessage("Login successful!");
+      // setTimeout(() => {
+      //   router.replace(redirectTo);
+      // }, 800);
+      router.replace(redirectTo);
     } catch (err) {
       const error = err as Error;
       console.error(error);
