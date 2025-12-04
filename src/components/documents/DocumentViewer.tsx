@@ -26,10 +26,14 @@ export default function DocumentViewer({ documentId }: DocumentViewerProps) {
   const [annotations, setAnnotations] = useState<AnnotationWithUser[]>([]);
   const [selectedAnnotationId, setSelectedAnnotationId] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
 
   useEffect(() => {
     loadDocument();
     loadCurrentUser();
+    loadSummary();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [documentId]);
 
@@ -72,6 +76,20 @@ export default function DocumentViewer({ documentId }: DocumentViewerProps) {
       setError(err instanceof Error ? err.message : 'Failed to load document');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadSummary = async () => {
+    try {
+      setSummaryLoading(true);
+      setSummaryError(null);
+      const summaryText = await DocumentService.getSummary(documentId);
+      setSummary(summaryText);
+    } catch (err) {
+      setSummaryError(err instanceof Error ? err.message : 'Failed to load summary');
+      console.error('Error loading summary:', err);
+    } finally {
+      setSummaryLoading(false);
     }
   };
 
@@ -355,6 +373,25 @@ export default function DocumentViewer({ documentId }: DocumentViewerProps) {
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="p-8">
+                {summary && (
+                  <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h3 className="text-sm font-medium text-blue-900 mb-2">AI Summary</h3>
+                    <p className="text-sm text-blue-800">{summary}</p>
+                  </div>
+                )}
+                {summaryLoading && (
+                  <div className="mb-8 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                      <p className="text-sm text-gray-600">Generating AI summary...</p>
+                    </div>
+                  </div>
+                )}
+                {summaryError && (
+                  <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-sm text-red-800">{summaryError}</p>
+                  </div>
+                )}
                 {document.raw_text ? (
                   <HighlightedText
                     text={document.raw_text}
@@ -400,4 +437,5 @@ export default function DocumentViewer({ documentId }: DocumentViewerProps) {
     </div>
   );
 }
+
 
