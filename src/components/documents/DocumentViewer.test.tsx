@@ -8,12 +8,6 @@ import { supabase } from '@/lib/supabaseClient';
 import type { Document } from '@/lib/types/document';
 import type { AnnotationWithUser } from '@/lib/types/annotation';
 
-type Selection = {
-  removeAllRanges: () => void;
-  rangeCount: number;
-  toString: () => string;
-  getRangeAt: (index: number) => Range;
-};
 
 jest.mock('@/services/documentService');
 jest.mock('@/services/annotationService');

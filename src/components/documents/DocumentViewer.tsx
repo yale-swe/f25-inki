@@ -12,6 +12,7 @@ import { supabase } from '@/lib/supabaseClient';
 import HighlightedText from './HighlightedText';
 import AnnotationSidebar from './AnnotationSidebar';
 import AnnotationToolbar from './AnnotationToolbar';
+import { generateAnnotatedPDF } from '@/services/pdfExportService';
 interface DocumentViewerProps {
   documentId: string;
 }
@@ -247,6 +248,17 @@ export default function DocumentViewer({ documentId }: DocumentViewerProps) {
     }
   };
 
+  const handleExportPDF = async () => {
+    if (!document) {
+      return;
+    }
+
+    try {
+      await generateAnnotatedPDF(document, annotations);
+    } catch (err) {
+      console.error('Failed to export PDF:', err);
+    }
+  };
 
   if (loading) {
     return (
@@ -321,6 +333,16 @@ export default function DocumentViewer({ documentId }: DocumentViewerProps) {
                   <span>{formatDate(document.created_at)}</span>
                 </div>
               </div>
+              <button
+                onClick={handleExportPDF}
+                disabled={!document.raw_text}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center space-x-2 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>Export PDF</span>
+              </button>
             </div>
           </div>
         </div>
@@ -419,7 +441,6 @@ export default function DocumentViewer({ documentId }: DocumentViewerProps) {
 
       {permissions.canView && (
         <AnnotationSidebar
-          documentId={documentId}
           annotations={annotations}
           selectedAnnotationId={selectedAnnotationId}
           canCreate={permissions.canCreate}
