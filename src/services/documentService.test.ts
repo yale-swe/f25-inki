@@ -533,7 +533,7 @@ describe('DocumentService', () => {
       });
 
       // Ensure storage API exists
-      (supabase as any).storage = {
+      (supabase as Record<string, unknown>).storage = {
         from: jest.fn()
       };
 
