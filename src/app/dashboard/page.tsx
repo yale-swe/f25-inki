@@ -140,6 +140,10 @@ export default function DashboardPage() {
         return readings;
     }
   };
+  
+  const handleDelete = (id: string) => {
+    setReadings((prev) => prev.filter((r) => r.id !== id));
+  };
 
   const filteredReadings = getFilteredReadings();
 
@@ -175,7 +179,7 @@ export default function DashboardPage() {
             ) : (
               <>
                 {viewMode === "gallery" ? (
-                  <ReadingGrid readings={filteredReadings} />
+                  <ReadingGrid readings={filteredReadings} onDelete={handleDelete}/>
                 ) : (
                   <ReadingList readings={filteredReadings} />
                 )}

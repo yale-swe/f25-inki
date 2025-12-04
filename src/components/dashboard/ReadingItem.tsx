@@ -28,8 +28,8 @@ export default function ReadingItem({ reading, viewMode, onDelete }: ReadingItem
     if (!confirmed) return;
 
     try {
-      await DocumentService.deleteDocument(reading.id);
-      onDelete?.(reading.id);
+      const { id: deletedId } = await DocumentService.deleteDocument(reading.id);
+      onDelete?.(deletedId);
       router.refresh();
     } catch (err) {
       const error = err as Error;
