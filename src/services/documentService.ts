@@ -142,18 +142,38 @@ export class DocumentService {
 
   static async deleteDocument(id: string): Promise<void> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-      const { error } = await supabase
-        .from('documents')
-        .delete()
-        .eq('id', id)
-        .eq('owner_id', user.id);
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) throw authError;
+      if (!user) throw new Error('User not authenticated');
+
+      // 1. RPC delete: deletes the row, cascades document_shares, returns storage info
+      const { data, error } = await supabase.rpc("delete_document", {
+        p_document_id: id,
+      });
+      console.log("RPC result:", { data, error });
 
       if (error) {
-        throw error;
+        console.error("RPC delete_document error:", error);
+        throw new Error(error.message);
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error("Document not found or not authorized to delete.");
+      }
+
+      const { storage_bucket, storage_path } = data[0];
+
+      // 2. Frontend storage deletion
+      if (storage_bucket && storage_path) {
+        const { error: storageError } = await supabase
+          .storage
+          .from(storage_bucket)
+          .remove([storage_path]);
+
+        if (storageError) {
+          console.error("Storage delete failed:", storageError);
+          // We don't throw here because DB deletion was successful
+        }
       }
     } catch (error) {
       console.error('Error deleting document:', error);

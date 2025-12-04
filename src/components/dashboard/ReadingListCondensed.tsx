@@ -4,6 +4,7 @@ import { Reading } from "@/lib/dummyData";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import ShareLinkButton from "@/components/ShareLinkButton";
+import { DocumentService } from "@/services/documentService";
 
 interface ReadingListCondensedProps {
   readings: Reading[];
@@ -30,9 +31,25 @@ export default function ReadingListCondensed({
     };
   }, []);
 
-  const handleDelete = (id: string) => {
-    console.log("Delete reading:", id);
-    // TODO: Implement actual delete functionality
+  const handleDelete = async (id: string) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to permanently delete this document?"
+    );
+    if (!confirmed) return;
+
+    try {
+      await DocumentService.deleteDocument(id);
+
+      // Remove deleted item from local UI list
+      // You may be receiving `readings` via props, so update locally.
+      router.refresh(); // if you use server components OR
+      // OR update local state (better if readings is state-managed)
+      // setReadings((prev) => prev.filter((r) => r.id !== id));
+
+    } catch (err) {
+      console.error("Error deleting document:", err);
+      alert("Failed to delete document. Please try again.");
+    }
   };
 
   const toggleSelection = (id: string) => {
