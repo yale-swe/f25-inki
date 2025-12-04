@@ -3,16 +3,40 @@
 import { Reading } from "@/lib/dummyData";
 import {} from "react";
 import ShareLinkButton from "@/components/ShareLinkButton";
+import { DocumentService } from "@/services/documentService";
+import { Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface ReadingItemProps {
   reading: Reading;
   viewMode: "gallery" | "list";
+  onDelete?: (id: string) => void;
 }
 
-export default function ReadingItem({ reading, viewMode }: ReadingItemProps) {
+export default function ReadingItem({ reading, viewMode, onDelete }: ReadingItemProps) {
   // Minimal actions (share handled by icon button)
   const router = useRouter();
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    console.log("Attempting to delete:", reading.id);
+
+    const confirmed = window.confirm(
+      `Delete "${reading.title}"? This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    try {
+      await DocumentService.deleteDocument(reading.id);
+      onDelete?.(reading.id);
+      router.refresh();
+    } catch (err) {
+      const error = err as Error;
+      // console.error("Delete error →", error);
+      alert("Failed to delete document: " + (error.message ?? ""));
+    }
+  };
 
   const handleNavigate = () => {
     if (reading.id) {
@@ -80,7 +104,15 @@ export default function ReadingItem({ reading, viewMode }: ReadingItemProps) {
                 )}
               </div>
 
-              <div className="ml-4" onClick={(e) => e.stopPropagation()}>
+              <div className="ml-4 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={handleDelete}
+                  className="p-1 text-red-500 hover:text-red-700"
+                  aria-label="Delete document"
+                >
+                  <Trash className="w-5 h-5" />
+                </button>
+
                 <ShareLinkButton documentId={reading.id} variant="icon" />
               </div>
             </div>
@@ -118,7 +150,23 @@ export default function ReadingItem({ reading, viewMode }: ReadingItemProps) {
           <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
             {reading.title}
           </h3>
-          <div className="ml-2" onClick={(e) => e.stopPropagation()}>
+          <div className="ml-2 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={handleDelete}
+              aria-label="Delete document"
+              className="
+                rounded-md p-2 
+                bg-white 
+                shadow-[2px_2px_6px_#d1d5db,-2px_-2px_6px_#ffffff] 
+                hover:shadow-[1px_1px_3px_#d1d5db,-1px_-1px_3px_#ffffff] 
+                transition-shadow
+                text-red-500 hover:text-red-600
+                flex items-center justify-center
+              "
+            >
+              <Trash className="w-4 h-4" strokeWidth={2} />
+            </button>
+
             <ShareLinkButton documentId={reading.id} variant="icon" />
           </div>
         </div>

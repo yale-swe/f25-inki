@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Reading } from "@/lib/dummyData";
 import ReadingItem from "./ReadingItem";
 
@@ -8,7 +9,13 @@ interface ReadingGridProps {
 }
 
 export default function ReadingGrid({ readings }: ReadingGridProps) {
-  if (readings.length === 0) {
+  const [items, setItems] = useState(readings);
+
+  const handleDelete = (id: string) => {
+    setItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  if (items.length === 0) {
     return (
       <div className="text-center py-12">
         <svg
@@ -36,9 +43,13 @@ export default function ReadingGrid({ readings }: ReadingGridProps) {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {readings.map((reading) => (
+      {items.map((reading) => (
         <div key={reading.id} className="neu-outset rounded-lg">
-          <ReadingItem reading={reading} viewMode="gallery" />
+          <ReadingItem 
+          reading={reading} 
+          viewMode="gallery" 
+          onDelete={handleDelete}
+        />
         </div>
       ))}
     </div>

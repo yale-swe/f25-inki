@@ -520,16 +520,33 @@ describe('DocumentService', () => {
         error: null
       });
 
-      mockQuery._setResolveValue({
+      // Mock RPC response
+      (supabase.rpc as jest.Mock).mockResolvedValue({
+        data: [
+          {
+            id: documentId,
+            storage_bucket: null,
+            storage_path: null
+          }
+        ],
         error: null
+      });
+
+      // Ensure storage API exists
+      (supabase as Record<string, unknown>).storage = {
+        from: jest.fn()
+      };
+
+      // Mock storage removal
+      (supabase.storage.from as jest.Mock).mockReturnValue({
+        remove: jest.fn().mockResolvedValue({ data: null, error: null })
       });
 
       await DocumentService.deleteDocument(documentId);
 
-      expect(supabase.auth.getUser).toHaveBeenCalled();
-      expect(mockQuery.delete).toHaveBeenCalled();
-      expect(mockQuery.eq).toHaveBeenCalledWith('id', documentId);
-      expect(mockQuery.eq).toHaveBeenCalledWith('owner_id', mockUser.id);
+      expect(supabase.rpc).toHaveBeenCalledWith("delete_document", {
+        p_document_id: documentId,
+      });
     });
 
     it('should throw error when user is not authenticated', async () => {
@@ -552,9 +569,9 @@ describe('DocumentService', () => {
         error: null
       });
 
-      const dbError = new Error('Database error');
-      mockQuery._setResolveValue({
-        error: dbError
+      (supabase.rpc as jest.Mock).mockResolvedValue({
+        data: null,
+        error: { message: "RPC error" },
       });
 
       await expect(DocumentService.deleteDocument(documentId)).rejects.toThrow('Database error');
