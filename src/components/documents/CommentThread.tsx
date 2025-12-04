@@ -6,7 +6,6 @@ import { AnnotationWithUser } from '@/lib/types/annotation';
 interface CommentThreadProps {
   highlight: AnnotationWithUser;
   comments: AnnotationWithUser[];
-  documentId: string;
   isSelected: boolean;
   canCreate: boolean;
   canDelete: (annotation: AnnotationWithUser) => boolean;
@@ -18,7 +17,6 @@ interface CommentThreadProps {
 export default function CommentThread({
   highlight,
   comments,
-  documentId,
   isSelected,
   canCreate,
   canDelete,

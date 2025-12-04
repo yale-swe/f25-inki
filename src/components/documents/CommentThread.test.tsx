@@ -46,7 +46,6 @@ describe('CommentThread', () => {
   const defaultProps = {
     highlight: mockHighlight,
     comments: [],
-    documentId: 'doc-1',
     isSelected: false,
     canCreate: true,
     canDelete: jest.fn(() => true),

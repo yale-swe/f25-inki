@@ -90,7 +90,6 @@ describe('AnnotationSidebar', () => {
   ];
 
   const defaultProps = {
-    documentId: 'doc-1',
     annotations: [],
     selectedAnnotationId: null,
     canCreate: true,
