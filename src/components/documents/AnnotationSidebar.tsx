@@ -5,7 +5,6 @@ import { AnnotationWithUser, AnnotationThread } from '@/lib/types/annotation';
 import CommentThread from './CommentThread';
 
 interface AnnotationSidebarProps {
-  documentId: string;
   annotations: AnnotationWithUser[];
   selectedAnnotationId: string | null;
   canCreate: boolean;
@@ -16,7 +15,6 @@ interface AnnotationSidebarProps {
 }
 
 export default function AnnotationSidebar({
-  documentId,
   annotations,
   selectedAnnotationId,
   canCreate,
@@ -85,7 +83,6 @@ export default function AnnotationSidebar({
                 key={thread.highlight.id}
                 highlight={thread.highlight}
                 comments={thread.comments}
-                documentId={documentId}
                 isSelected={selectedAnnotationId === thread.highlight.id}
                 canCreate={canCreate}
                 canDelete={canDelete}

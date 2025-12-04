@@ -1,4 +1,8 @@
 import '@testing-library/jest-dom';
+import { TextEncoder, TextDecoder } from 'util';
+
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder as typeof global.TextDecoder;
 
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
   process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost:8000';

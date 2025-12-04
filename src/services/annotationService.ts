@@ -28,7 +28,7 @@ export class AnnotationService {
 
       if (error) {
         console.error('Error fetching annotations:', error);
-        throw error;
+        throw new Error(error.message || 'Database error');
       }
 
       return (data || []) as AnnotationWithUser[];
@@ -63,7 +63,7 @@ export class AnnotationService {
 
       if (error) {
         console.error('Error creating highlight:', error);
-        throw error;
+        throw new Error(error.message || 'Database error');
       }
 
       return annotationData;
@@ -98,7 +98,7 @@ export class AnnotationService {
 
       if (error) {
         console.error('Error creating comment:', error);
-        throw error;
+        throw new Error(error.message || 'Database error');
       }
 
       return annotationData;
@@ -123,7 +123,7 @@ export class AnnotationService {
 
       if (error) {
         console.error('Error deleting annotation:', error);
-        throw error;
+        throw new Error(error.message || 'Database error');
       }
     } catch (error) {
       console.error('Error in deleteAnnotation:', error);
