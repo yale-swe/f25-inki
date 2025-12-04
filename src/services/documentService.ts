@@ -154,7 +154,7 @@ export class DocumentService {
 
       if (error) {
         console.error("RPC delete_document error:", error);
-        throw new Error("Database error: " + error.message);
+        throw new Error(error.message);
       }
 
       if (!data || data.length === 0) {
