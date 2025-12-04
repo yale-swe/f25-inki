@@ -140,7 +140,7 @@ export class DocumentService {
     }
   }
 
-  static async deleteDocument(id: string): Promise<void> {
+  static async deleteDocument(id: string): Promise<{ id: string }> {
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError) throw authError;
@@ -150,7 +150,6 @@ export class DocumentService {
       const { data, error } = await supabase.rpc("delete_document", {
         p_document_id: id,
       });
-      console.log("RPC result:", { data, error });
 
       if (error) {
         console.error("RPC delete_document error:", error);
@@ -175,6 +174,7 @@ export class DocumentService {
           // We don't throw here because DB deletion was successful
         }
       }
+      return { id };
     } catch (error) {
       console.error('Error deleting document:', error);
       throw error;
